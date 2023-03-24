@@ -3,7 +3,7 @@ package com.ivonunes.mf.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Field {
+public class Field  {
 
   private boolean mine = false;
   private boolean open = false;
@@ -12,6 +12,7 @@ public class Field {
   private int line;
   private int column;
 
+  private List<FieldObserver> observers = new ArrayList<>();
 
   public Field( int line, int column) {
     this.line = line;
@@ -54,6 +55,12 @@ public class Field {
      */
     if (!open){
       this.marked = !marked;
+
+      if (marked){
+        notifyObservers(FieldEvent.MARK);
+      }else{
+        notifyObservers(FieldEvent.UNMARK);
+      }
     }
   }
 
@@ -129,5 +136,13 @@ public class Field {
     this.open = open;
   }
 
+  public void addObserver(FieldObserver fO){
+    observers.add(fO);
+  }
+
+  public void notifyObservers(FieldEvent fE){
+      observers.stream()
+        .forEach( o -> o.eventOccured(this, fE));
+  }
 
 }
