@@ -14,6 +14,7 @@ public class Field  {
 
   private List<FieldObserver> observers = new ArrayList<>();
 
+
   public Field( int line, int column) {
     this.line = line;
     this.column = column;
@@ -72,10 +73,15 @@ public class Field  {
     he opens all the fields
      */
     if (!marked && !open ){
-      this.open = true;
+
       if ( mine ){
-        // TODO New Version Implementation
+        notifyObservers(FieldEvent.EXPLODE);
+        return true;
       }
+
+      setOpen(true);
+      notifyObservers(FieldEvent.OPEN);
+
       if (safeNeighbour()){
         neighbours.forEach(n -> n.open());
       }
@@ -134,6 +140,9 @@ public class Field  {
 
   public void setOpen(boolean open) {
     this.open = open;
+    if(open){
+      notifyObservers(FieldEvent.OPEN);
+    }
   }
 
   public void addObserver(FieldObserver fO){

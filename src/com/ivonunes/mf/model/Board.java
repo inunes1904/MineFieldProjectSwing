@@ -2,10 +2,11 @@ package com.ivonunes.mf.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
-public class Board {
+public class Board implements FieldObserver {
 
   private int lines;
   private int columns;
@@ -13,6 +14,16 @@ public class Board {
   private int mines;
 
   private final List<Field> fields = new ArrayList<>();
+  private final List<Consumer<EventResult>> observers = new ArrayList<>();
+
+  public void registerObserver(Consumer<EventResult> observer){
+    observers.add(observer);
+  }
+
+  public void notifyObservers(boolean res){
+    observers.stream()
+      .forEach( o -> o.accept(new EventResult(res)));
+  }
 
   public Board(int lines, int columns, int mines) {
     this.lines = lines;
@@ -38,6 +49,11 @@ public class Board {
     }
   }
 
+  private void showMines(){
+    fields.stream().filter(c -> c.isMined())
+      .forEach(c -> c.setOpen(true));
+  }
+
   public void markField(int line, int column){
     fields.parallelStream()
             .filter(c -> c.getLine() == line &&
@@ -46,11 +62,22 @@ public class Board {
   }
 
   private void generateFields() {
-    for (int i = 0; i < lines ; i++) {
-      for (int j = 0; j < columns; j++) {
-        fields.add( new Field(i,j));
+    // l = line c = column
+    for (int l = 0; l < lines ; l++) {
+      for (int c = 0; c < columns; c++) {
+        Field newField = new Field(l, c);
+        newField.addObserver(this);
+        fields.add( newField);
       }
     }
+  }
+
+  public int getLines() {
+    return lines;
+  }
+
+  public int getColumns() {
+    return columns;
   }
 
   private void joinNeighbours() {
@@ -80,4 +107,21 @@ public class Board {
   }
 
 
+  @Override
+  public void eventOccured(Field c, FieldEvent fE) {
+    if (fE == FieldEvent.EXPLODE){
+      System.out.println("You Lose!");
+      showMines();
+      notifyObservers(false);
+    }
+    else if (objectiveDone()){
+      System.out.println("You Win!");
+      System.out.println("Congratulations!");
+      notifyObservers(true);
+    }
+  }
+
+  public void forEachOne(Consumer<Field> func){
+    fields.forEach(func);
+  }
 }
