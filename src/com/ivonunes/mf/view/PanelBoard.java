@@ -13,7 +13,14 @@ public class PanelBoard extends JPanel {
 
     board.forEachOne(f -> add(new ButtonField(f)));
     board.registerObserver(e -> {
-      // TODO show the result to the user and reset if needed
+      SwingUtilities.invokeLater( ()->{
+        if (e.isWin()){
+          JOptionPane.showMessageDialog(this, "YOU WIN!\n\nCONGRATULATIONS!");
+        }else {
+          JOptionPane.showMessageDialog(this, "YOU LOSE!");
+        }
+        board.reset();
+      });
     });
   }
 }

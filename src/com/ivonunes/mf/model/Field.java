@@ -65,7 +65,7 @@ public class Field  {
     }
   }
 
-  boolean open(){
+  public boolean open(){
     /*
     Verify if the field is marked because you can only open a field
     if the field is not marked, if user tried to open a mined field
@@ -90,7 +90,7 @@ public class Field  {
     return false;
   }
 
-  boolean safeNeighbour(){
+  public boolean safeNeighbour(){
     /*
     Verify if the neighbours don't have mines and
     returns true if they are clean
@@ -128,14 +128,15 @@ public class Field  {
     return revealedField || protectedField;
   }
 
-  long minesInTheNeighbourhood(){
-    return neighbours.stream().filter(v -> v.mine).count();
+  public int minesInTheNeighbourhood(){
+    return (int) neighbours.stream().filter(v -> v.mine).count();
   }
 
   void reset(){
     open = false;
     mine = false;
     marked = false;
+    notifyObservers(FieldEvent.RESET);
   }
 
   public void setOpen(boolean open) {
